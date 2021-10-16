@@ -1,13 +1,13 @@
 # dataset settings
-dataset_type = 'ADE20KDataset'
-data_root = '/home/ubuntu/dataset/ADE20K/ADEChallengeData2016'
+dataset_type = 'CityscapesDataset'
+data_root = '/home/ubuntu/dataset/Cityscape'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
-crop_size = (480, 480)
+crop_size = (768, 768)
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='LoadAnnotations', reduce_zero_label=True),
-    dict(type='Resize', img_scale=(2048, 512), ratio_range=(0.5, 2.0)),
+    dict(type='LoadAnnotations'),
+    dict(type='Resize', img_scale=(2048, 1024), ratio_range=(0.5, 2.0)),
     dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),
     dict(type='RandomFlip', prob=0.5),
     dict(type='PhotoMetricDistortion'),
@@ -20,7 +20,7 @@ test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
         type='MultiScaleFlipAug',
-        img_scale=(2048, 512),
+        img_scale=(2048, 1024),
         img_ratios=[0.5, 0.75, 1.0, 1.25, 1.5, 1.75],
         flip=True,
         transforms=[
@@ -37,23 +37,22 @@ data = dict(
     train=dict(
         type=dataset_type,
         data_root=data_root,
-        img_dir='images/training',
-        ann_dir='annotations/training',
-        dt_dir='dt_offset/training',
+        img_dir='leftImg8bit/train',
+        ann_dir='gtFine/train',
+        dt_dir='dt_offset/train',
         pipeline=train_pipeline),
     val=dict(
         type=dataset_type,
         data_root=data_root,
-        img_dir='images/validation',
-        ann_dir='annotations/validation',
-        dt_dir='dt_offset/validation',
+        img_dir='leftImg8bit/val',
+        ann_dir='gtFine/val',
+        dt_dir='dt_offset/val',
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
         data_root=data_root,
-        img_dir='images/validation',
-        ann_dir='annotations/validation',
-        dt_dir='dt_offset/validation',
+        img_dir='leftImg8bit/test',
+        ann_dir='gtFine/test',
         pipeline=test_pipeline))
 
 # model settings
@@ -67,10 +66,10 @@ model = dict(
     heads=8,
     hidden_dim=2048,
     depth=2,
-    pretrained='/home/ubuntu/work/pretrained/deit_base_distilled_patch16_384-d0272ac0.pth',
+    pretrained='deit_base_distilled_patch16_384-d0272ac0.pth',
     backbone_cfg=dict(
                     type='DeiT',
-                    img_size=480,
+                    img_size=768,
                     patch_size=16,
                     embed_dim=768,
                     bb_depth=12,
@@ -82,7 +81,7 @@ model = dict(
                      loss_weight=1.0))
 # model training and testing settings
 train_cfg = dict()
-test_cfg = dict(mode='slide', num_classes=150, stride=(160,160), crop_size=(480, 480), num_queries=3600)
+test_cfg = dict(mode='slide', num_classes=19, stride=(256,256), crop_size=(768, 768), num_queries=9216)
 
 # optimizer
 optimizer = dict(type='AdamW', lr=0.0001, weight_decay=0.0001, betas=(0.9, 0.999), eps=1e-8,
@@ -90,10 +89,10 @@ optimizer = dict(type='AdamW', lr=0.0001, weight_decay=0.0001, betas=(0.9, 0.999
 
 optimizer_config = dict()
 # learning policy
-lr_config = dict(policy='step', step=126000, by_epoch=False)
+lr_config = dict(policy='step', step=64000, by_epoch=False)
 # runtime settings
 # total_iters = 640000
-runner = dict(type='IterBasedRunner', max_iters=160000)
+runner = dict(type='IterBasedRunner', max_iters=80000)
 checkpoint_config = dict(by_epoch=False, interval=10000)
 evaluation = dict(interval=10000, metric='mIoU')
 

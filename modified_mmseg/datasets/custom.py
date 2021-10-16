@@ -75,6 +75,7 @@ class CustomDataset(Dataset):
                  pipeline,
                  img_dir,
                  img_suffix='.jpg',
+                 dt_suffix='.mat',
                  ann_dir=None,
                  dt_dir=None,
                  seg_map_suffix='.png',
@@ -88,6 +89,7 @@ class CustomDataset(Dataset):
         self.pipeline = Compose(pipeline)
         self.img_dir = img_dir
         self.img_suffix = img_suffix
+        self.dt_suffix = dt_suffix
         self.ann_dir = ann_dir
         self.dt_dir = dt_dir
         self.seg_map_suffix = seg_map_suffix
@@ -158,7 +160,7 @@ class CustomDataset(Dataset):
                     img_info['ann'] = dict(seg_map=seg_map)
                 
                 if dt_dir is not None:
-                    dt_map = img.replace(img_suffix, '.mat')
+                    dt_map = img.replace(img_suffix, self.dt_suffix)
                     img_info['dt'] = dict(dt_map=dt_map)
                 
                 img_infos.append(img_info)
